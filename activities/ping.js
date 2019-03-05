@@ -1,18 +1,23 @@
 'use strict';
 
-const logger = require('@adenin/cf-logger');
-const utils = require('./common/utils');
+const cfActivity = require('@adenin/cf-activity');
+const api = require('./common/api');
 
 module.exports = async (activity) => {
   try {
-    const message = 'This is an empty activity';
+    api.initialize(activity);
 
-    logger.info(message);
+    //sending wrong token after initial authorization returns success
+    //might be because I am getting error:
+    //response.body.response.errors.code => 7074
+    //"API is unavailable for your pricing plan. Please upgrade to access"
+    const response = await api('/announcement/getAllAnnouncement?startIdx=1');
 
     activity.Response.Data = {
-      message: message
+      success: response && response.statusCode === 200
     };
   } catch (error) {
-    utils.handleError(error, activity);
+    cfActivity.handleError(activity, error);
+    activity.Response.Data.success = false;
   }
 };

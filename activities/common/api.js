@@ -30,7 +30,7 @@ function api(path, opts) {
     opts.headers.Authorization = `token ${opts.token}`;
   }
 
-  const url = /^http(s)\:\/\/?/.test(path) && opts.endpoint ? path : opts.endpoint + path;
+  const url = /^http(s)\:\/\/?/.test(path) && opts.endpoint ? path : opts.endpoint + path +`&authtoken=${_activity.Context.connector.custom1}`;
 
   if (opts.stream) {
     return got.stream(url, opts);
@@ -40,25 +40,7 @@ function api(path, opts) {
     throw err;
   });
 }
-// convert response from /issues endpoint to 
-api.convertResponse = function (response) {
-  let items = [];
-  let announcements = response.body.response.result.resultData.announcementList;
 
-  // iterate through each issue and extract id, title, etc. into a new array
-  for (let i = 0; i < announcements.length; i++) {
-    let raw = announcements[i];
-    let item = { id: raw.announcementId, 
-      title: raw.subject, 
-      description: raw.message, 
-      link: `https://people.zoho.com/myportalhome/zp#organization/announcements/announcement-annId:${raw.announcementId}`, 
-      raw: raw 
-    };
-    items.push(item);
-  }
-
-  return { items: items };
-}
 const helpers = [
   'get',
   'post',

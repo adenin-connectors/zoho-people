@@ -7,16 +7,36 @@ module.exports = async function (activity) {
 
   try {
     api.initialize(activity);
-
-    const response = await api(`/announcement/getAllAnnouncement?authtoken=${activity.Context.connector.custom1}&startIdx=1`);
+    const response = await api(`/announcement/getAllAnnouncement?startIdx=1`);
 
     if (!cfActivity.isResponseOk(activity, response)) {
       return;
     }
-    // convert response to items[]
-    activity.Response.Data = api.convertResponse(response);
+    //if response.body.response.errors.code == 7074
+    //"API is unavailable for your pricing plan. Please upgrade to access"
+    activity.Response.Data = convertResponse(response);
   } catch (error) {
 
-    cfActivity.handleError(error, activity);
+    cfActivity.handleError(activity, error);
   }
 };
+
+//**maps response data to items */
+function convertResponse(response) {
+  let items = [];
+  let announcements = response.body.response.result.resultData.announcementList;
+
+  for (let i = 0; i < announcements.length; i++) {
+    let raw = announcements[i];
+    let item = {
+      id: raw.announcementId,
+      title: raw.subject,
+      description: raw.message,
+      link: `https://people.zoho.com/myportalhome/zp#organization/announcements/announcement-annId:${raw.announcementId}`,
+      raw: raw
+    };
+    items.push(item);
+  }
+
+  return { items: items };
+}

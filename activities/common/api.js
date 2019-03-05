@@ -2,6 +2,7 @@
 const got = require('got');
 const isPlainObj = require('is-plain-obj');
 const HttpAgent = require('agentkeepalive');
+const logger = require('@adenin/cf-logger');
 const HttpsAgent = HttpAgent.HttpsAgent;
 
 let _activity = null;
@@ -30,7 +31,7 @@ function api(path, opts) {
     opts.headers.Authorization = `token ${opts.token}`;
   }
 
-  const url = /^http(s)\:\/\/?/.test(path) && opts.endpoint ? path : opts.endpoint + path +`&authtoken=${_activity.Context.connector.custom1}`;
+  const url = /^http(s)\:\/\/?/.test(path) && opts.endpoint ? path : opts.endpoint + path + `&authtoken=${_activity.Context.connector.custom1}`;
 
   if (opts.stream) {
     return got.stream(url, opts);
@@ -57,12 +58,31 @@ api.stream = (url, opts) => apigot(url, Object.assign({}, opts, {
 
 api.initialize = function (activity) {
   _activity = activity;
-}
+};
 
 for (const x of helpers) {
   const method = x.toUpperCase();
   api[x] = (url, opts) => api(url, Object.assign({}, opts, { method }));
   api.stream[x] = (url, opts) => api.stream(url, Object.assign({}, opts, { method }));
 }
+//** Checks response for statusCode200 && response.body.response.errors.code == 7074*/
+api.isResponseOk = function (activity, response) {
+  if (response && response.statusCode === 200 && response.body.response.result) {
+    return true;
+  }
+
+  if (response.statusCode == 200) {
+    response.statusCode = 500;
+  }
+
+  activity.Response.ErrorCode = response.statusCode || 500;
+  activity.Response.Data = {
+    ErrorText: `request failed with statusCode ${response.body.response.errors.code}: ${response.body.response.errors.message}`
+  };
+
+  logger.error(activity.Response.Data.ErrorText);
+
+  return false;
+};
 
 module.exports = api;

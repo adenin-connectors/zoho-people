@@ -9,11 +9,10 @@ module.exports = async function (activity) {
     api.initialize(activity);
     const response = await api(`/announcement/getAllAnnouncement?startIdx=1`);
 
-    if (!cfActivity.isResponseOk(activity, response)) {
+    if (!api.isResponseOk(activity, response)) {
       return;
     }
-    //if response.body.response.errors.code == 7074
-    //"API is unavailable for your pricing plan. Please upgrade to access"
+
     activity.Response.Data = convertResponse(response);
   } catch (error) {
 

@@ -13,6 +13,10 @@ module.exports = async (activity) => {
     //"API is unavailable for your pricing plan. Please upgrade to access"
     const response = await api('/announcement/getAllAnnouncement?startIdx=1');
 
+    if (!api.isResponseOk(activity, response)) {
+      return;
+    }
+
     activity.Response.Data = {
       success: response && response.statusCode === 200
     };

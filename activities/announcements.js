@@ -1,22 +1,20 @@
 'use strict';
-
-const cfActivity = require('@adenin/cf-activity');
 const api = require('./common/api');
 
 module.exports = async function (activity) {
 
   try {
-    api.initialize(activity);
-    const response = await api(`/announcement/getAllAnnouncement?startIdx=1`);
+    var pagination = Activity.pagination();
+    let startIndex = pagination.page*10;
+    //*startIdx - the starting index to be given - 10 records from the given starting index will be fetched at a time; 
+    //starting index should be 1 or greater than 1
+    const response = await api(`/announcement/getAllAnnouncement?startIdx=1&startIdx=${startIndex}`);
 
-    if (!api.isResponseOk(activity, response)) {
-      return;
-    }
+    if (Activity.isErrorResponse(response)) return;
 
     activity.Response.Data = convertResponse(response);
   } catch (error) {
-
-    cfActivity.handleError(activity, error);
+    Activity.handleError(error);
   }
 };
 

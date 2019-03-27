@@ -1,2 +1,9 @@
+ServiceName: 'announcements'
 InterfaceName: items
 Description: List Of Announcements
+APIDoc: ''
+Interfaces: 'search,pagination'
+RequiredScopes: ''
+AdditionalParameters:
+Method: ''
+

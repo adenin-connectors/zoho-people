@@ -1,11 +1,7 @@
 'use strict';
 const got = require('got');
-const isPlainObj = require('is-plain-obj');
 const HttpAgent = require('agentkeepalive');
-const logger = require('@adenin/cf-logger');
 const HttpsAgent = HttpAgent.HttpsAgent;
-
-let _activity = null;
 
 function api(path, opts) {
   if (typeof path !== 'string') {
@@ -14,7 +10,7 @@ function api(path, opts) {
 
   opts = Object.assign({
     json: true,
-    token: _activity.Context.connector.token,
+    token: Activity.Context.connector.token,
     endpoint: 'https://people.zoho.com/people/api',
     agent: {
       http: new HttpAgent(),
@@ -31,7 +27,7 @@ function api(path, opts) {
     opts.headers.Authorization = `token ${opts.token}`;
   }
 
-  const url = /^http(s)\:\/\/?/.test(path) && opts.endpoint ? path : opts.endpoint + path + `&authtoken=${_activity.Context.connector.custom1}`;
+  const url = /^http(s)\:\/\/?/.test(path) && opts.endpoint ? path : opts.endpoint + path + `&authtoken=${Activity.Context.connector.custom1}`;
 
   if (opts.stream) {
     return got.stream(url, opts);
@@ -55,10 +51,6 @@ api.stream = (url, opts) => apigot(url, Object.assign({}, opts, {
   json: false,
   stream: true
 }));
-
-api.initialize = function (activity) {
-  _activity = activity;
-};
 
 for (const x of helpers) {
   const method = x.toUpperCase();

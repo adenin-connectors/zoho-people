@@ -58,7 +58,7 @@ for (const x of helpers) {
   api.stream[x] = (url, opts) => api.stream(url, Object.assign({}, opts, { method }));
 }
 //** Checks response for statusCode200 && response.body.response.errors.code == 7074*/
-api.isResponseOk = function (activity, response) {
+api.isResponseOk = function (response) {
   if (response && response.statusCode === 200 && response.body.response.result) {
     return true;
   }
@@ -67,12 +67,12 @@ api.isResponseOk = function (activity, response) {
     response.statusCode = 500;
   }
 
-  activity.Response.ErrorCode = response.statusCode || 500;
-  activity.Response.Data = {
+  Activity.Response.ErrorCode = response.statusCode || 500;
+  Activity.Response.Data = {
     ErrorText: `request failed with statusCode ${response.body.response.errors.code}: ${response.body.response.errors.message}`
   };
 
-  logger.error(activity.Response.Data.ErrorText);
+  logger.error(Activity.Response.Data.ErrorText);
 
   return false;
 };

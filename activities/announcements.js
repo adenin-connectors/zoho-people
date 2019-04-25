@@ -4,7 +4,8 @@ const api = require('./common/api');
 module.exports = async function (activity) {
 
   try {
-    var pagination = Activity.pagination();
+    api.initialize(activity);
+    var pagination = $.pagination(activity);
     let startIndex = pagination.page * 10;
     //*startIdx - the starting index to be given - 10 records from the given starting index will be fetched at a time; 
     //starting index should be 1 or greater than 1
@@ -14,7 +15,7 @@ module.exports = async function (activity) {
 
     activity.Response.Data = convertResponse(response);
   } catch (error) {
-    Activity.handleError(error);
+    $.handleError(activity, error);
   }
 };
 
